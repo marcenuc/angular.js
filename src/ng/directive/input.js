@@ -267,6 +267,42 @@ var inputType = {
    */
   'email': emailInputType,
 
+  /**
+   * @ngdoc inputType
+   * @name angular.module.ng.$compileProvider.directive.input.file
+   *
+   * @description
+   * HTML file input field.
+   *
+   * @param {string} ngModel Assignable angular expression to data-bind to.
+   * @param {string} multiple Allows multiple files selection.
+   * @param {string=} name Property name of the form under which the control is published.
+   *
+   * @example
+      <doc:example>
+        <doc:source>
+         <script>
+           function Ctrl($scope) {
+           }
+         </script>
+         <form name="myForm" ng-controller="Ctrl">
+           file: <input type="file" ng-model="file"> single file selection.<br/>
+           files: <input type="file" ng-model="files" multiple> multi-file selection.<br/>
+           <tt>file.name = {{file.name}}</tt><br/>
+           <tt>files.length = {{files.length}}</tt><br/>
+          </form>
+        </doc:source>
+        <doc:scenario>
+          it('should change state', function() {
+            expect(binding('file.name')).toBeUndefined();
+
+            input('file').select('a file name');
+            expect(binding('file.name')).toEqual('a file name');
+          });
+        </doc:scenario>
+      </doc:example>
+   */
+  'file': fileInputType,
 
   /**
    * @ngdoc inputType
@@ -573,6 +609,33 @@ function emailInputType(scope, element, attr, ctrl, $sniffer, $browser) {
 
   ctrl.$formatters.push(emailValidator);
   ctrl.$parsers.push(emailValidator);
+}
+
+function fileInputType(scope, element, attr, ctrl) {
+  element.bind('change', function() {
+    scope.$apply(function() {
+      var files = element[0].files,
+          isValid = true;
+
+      if (attr.accept) {
+        var i, j, acceptType, fileType,
+            types = map(attr.accept.split(','), function(t) { return trim(t).split('/'); });
+        for (i = 0; i < files.length && isValid; ++i) {
+          fileType = files[i].type.split('/');
+          isValid = false;
+          for (j = 0; j < types.length && !isValid; ++j) {
+            acceptType = types[j];
+            isValid = acceptType[0] === fileType[0] && (acceptType[1] === '*' || acceptType[1] === fileType[1]);
+          }
+        }
+      }
+      ctrl.$setValidity('file', isValid);
+
+      var viewValue;
+      if (isValid) viewValue = attr.multiple ? files : files[0];
+      ctrl.$setViewValue(viewValue);
+    });
+  });
 }
 
 function radioInputType(scope, element, attr, ctrl) {
@@ -896,7 +959,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', 'ngModel', '$e
         } catch(e) {
           $exceptionHandler(e);
         }
-      })
+      });
     }
   };
 
