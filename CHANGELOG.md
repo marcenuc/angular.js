@@ -1,3 +1,57 @@
+<a name="1.0.0rc7"></a>
+# 1.0.0rc7  rc-generation (2012-04-30)
+
+## Features
+
+- **$parse:** CSP compatibility
+  ([2b87c814](https://github.com/angular/angular.js/commit/2b87c814ab70eaaff6359ce1a118f348c8bd2197),
+   [#893](https://github.com/angular/angular.js/issues/893))
+
+
+## Bug Fixes
+
+- **jqlite:**
+  - correctly reset event properties in IE8
+  ([a18926f9](https://github.com/angular/angular.js/commit/a18926f986166048a21097636f03ab29f107b154))
+  - mouseenter on FF no longer throws exceptions
+  ([43d15f83](https://github.com/angular/angular.js/commit/43d15f830f9d419c41c41f0682e47e86839e3917))
+
+
+## Docs
+
+- Tutorial has been finally updated to AngularJS v1.0! Check it out and provide feedback to make it
+  even better: <http://docs.angularjs.org/tutorial>
+- <http://docs-next.angularjs.org> now redirects to <http://docs.angularjs.org>
+
+
+
+<a name="v1.0.0rc6"></a>
+# v1.0.0rc6 runny-nose (2012-04-20)
+
+
+## Bug Fixes
+
+- **select:** properly handle empty & unknown options without ngOptions
+  ([904b69c7](https://github.com/angular/angular.js/commit/904b69c745ea4afc1d6ecd2a5f3138c6f947b157))
+- **compiler:** reading comment throws error in ie
+  ([46bb08a9](https://github.com/angular/angular.js/commit/46bb08a9d0780fafef6dc5c1140c71912462887a))
+- **document:** accidental clobbering of document.getAttribute
+  ([eafe15f5](https://github.com/angular/angular.js/commit/eafe15f54c686d5c83f777fd319f4c568e209432),
+   [#877](https://github.com/angular/angular.js/issues/877))
+- **script:** Incorrectly reading script text on ie
+  ([94dd6857](https://github.com/angular/angular.js/commit/94dd68570952f6f31abfa351b1159afcd3588a57))
+
+
+## Features
+
+- **$resource:** support HTTP PATCH method
+  ([e61fd1b4](https://github.com/angular/angular.js/commit/e61fd1b43a55496c11c63da7ca2fc05b88d44043),
+   [#887](https://github.com/angular/angular.js/issues/887))
+- **jquery:** jquery 1.7.2 support
+  ([8ebe5ccd](https://github.com/angular/angular.js/commit/8ebe5ccd9ace7807bedc7317d605370fe82b773d))
+
+
+
 <a name="1.0.0rc5"></a>
 # 1.0.0rc5 reality-distortion (2012-04-12)
 
