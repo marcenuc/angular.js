@@ -347,7 +347,7 @@ function $RootScopeProvider(){
            scope.counter = 0;
 
            expect(scope.counter).toEqual(0);
-           scope.$watch('name', function(scope, newValue, oldValue) {
+           scope.$watch('name', function(newValue, oldValue) {
              counter = counter + 1;
            });
            expect(scope.counter).toEqual(0);
@@ -372,7 +372,7 @@ function $RootScopeProvider(){
             watchLog = [],
             logIdx, logMsg;
 
-        flagPhase(target, '$digest');
+        beginPhase('$digest');
 
         do {
           dirty = false;
@@ -429,12 +429,13 @@ function $RootScopeProvider(){
           } while ((current = next));
 
           if(dirty && !(ttl--)) {
+            clearPhase();
             throw Error(TTL + ' $digest() iterations reached. Aborting!\n' +
                 'Watchers fired in the last 5 iterations: ' + toJson(watchLog));
           }
         } while (dirty || asyncQueue.length);
 
-        this.$root.$$phase = null;
+        clearPhase();
       },
 
 
@@ -469,7 +470,7 @@ function $RootScopeProvider(){
        * perform any necessary cleanup.
        */
       $destroy: function() {
-        if (this.$root == this) return; // we can't remove the root node;
+        if ($rootScope == this) return; // we can't remove the root node;
         var parent = this.$parent;
 
         this.$broadcast('$destroy');
@@ -586,13 +587,18 @@ function $RootScopeProvider(){
        */
       $apply: function(expr) {
         try {
-          flagPhase(this, '$apply');
+          beginPhase('$apply');
           return this.$eval(expr);
         } catch (e) {
           $exceptionHandler(e);
         } finally {
-          this.$root.$$phase = null;
-          this.$root.$digest();
+          clearPhase();
+          try {
+            $rootScope.$digest();
+          } catch (e) {
+            $exceptionHandler(e);
+            throw e;
+          }
         }
       },
 
@@ -616,9 +622,10 @@ function $RootScopeProvider(){
        *   - `targetScope` - {Scope}: the scope on which the event was `$emit`-ed or `$broadcast`-ed.
        *   - `currentScope` - {Scope}: the current scope which is handling the event.
        *   - `name` - {string}: Name of the event.
-       *   - `cancel` - {function=}: calling `cancel` function will cancel further event propagation
+       *   - `stopPropagation` - {function=}: calling `stopPropagation` function will cancel further event propagation
        *     (available only for events that were `$emit`-ed).
-       *   - `cancelled` - {boolean}: Whether the event was cancelled.
+       *   - `preventDefault` - {function}: calling `preventDefault` sets `defaultPrevented` flag to true.
+       *   - `defaultPrevented` - {boolean}: true if `preventDefault` was called.
        */
       $on: function(name, listener) {
         var namedListeners = this.$$listeners[name];
@@ -659,11 +666,15 @@ function $RootScopeProvider(){
         var empty = [],
             namedListeners,
             scope = this,
+            stopPropagation = false,
             event = {
               name: name,
               targetScope: scope,
-              cancel: function() {event.cancelled = true;},
-              cancelled: false
+              stopPropagation: function() {stopPropagation = true;},
+              preventDefault: function() {
+                event.defaultPrevented = true;
+              },
+              defaultPrevented: false
             },
             listenerArgs = concat([event], arguments, 1),
             i, length;
@@ -674,7 +685,7 @@ function $RootScopeProvider(){
           for (i=0, length=namedListeners.length; i<length; i++) {
             try {
               namedListeners[i].apply(null, listenerArgs);
-              if (event.cancelled) return event;
+              if (stopPropagation) return event;
             } catch (e) {
               $exceptionHandler(e);
             }
@@ -713,8 +724,14 @@ function $RootScopeProvider(){
         var target = this,
             current = target,
             next = target,
-            event = { name: name,
-                      targetScope: target },
+            event = {
+              name: name,
+              targetScope: target,
+              preventDefault: function() {
+                event.defaultPrevented = true;
+              },
+              defaultPrevented: false
+            },
             listenerArgs = concat([event], arguments, 1);
 
         //down while you can, then up and next sibling or up and next sibling until back at root
@@ -743,18 +760,22 @@ function $RootScopeProvider(){
       }
     };
 
+    var $rootScope = new Scope();
 
-    function flagPhase(scope, phase) {
-      var root = scope.$root;
+    return $rootScope;
 
-      if (root.$$phase) {
-        throw Error(root.$$phase + ' already in progress');
+
+    function beginPhase(phase) {
+      if ($rootScope.$$phase) {
+        throw Error($rootScope.$$phase + ' already in progress');
       }
 
-      root.$$phase = phase;
+      $rootScope.$$phase = phase;
     }
 
-    return new Scope();
+    function clearPhase() {
+      $rootScope.$$phase = null;
+    }
 
     function compileToFn(exp, name) {
       var fn = $parse(exp);

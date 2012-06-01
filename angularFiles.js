@@ -29,6 +29,7 @@ angularFiles = {
     'src/ng/http.js',
     'src/ng/httpBackend.js',
     'src/ng/locale.js',
+    'src/ng/timeout.js',
 
     'src/ng/filter.js',
     'src/ng/filter/filter.js',
@@ -59,7 +60,7 @@ angularFiles = {
     'src/ng/directive/ngView.js',
     'src/ng/directive/script.js',
     'src/ng/directive/select.js',
-    'src/ng/directive/style.js',
+    'src/ng/directive/style.js'
   ],
 
   'angularSrcModules': [
