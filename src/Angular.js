@@ -755,7 +755,9 @@ function startingTag(element) {
     // are not allowed to have children. So we just ignore it.
     element.html('');
   } catch(e) {}
-  return jqLite('<div>').append(element).html().match(/^(<[^>]+>)/)[1];
+  return jqLite('<div>').append(element).html().
+      match(/^(<[^>]+>)/)[1].
+      replace(/^<([\w\-]+)/, function(match, nodeName) { return '<' + lowercase(nodeName); });
 }
 
 
@@ -904,7 +906,7 @@ function angularInit(element, bootstrap) {
  * @description
  * Use this function to manually start up angular application.
  *
- * See: {@link guide/dev_guide.bootstrap.manual_bootstrap Bootstrap}
+ * See: {@link guide/bootstrap Bootstrap}
  *
  * @param {Element} element DOM element which is the root of angular application.
  * @param {Array<String|Function>=} modules an array of module declarations. See: {@link angular.module modules}
@@ -913,10 +915,13 @@ function angularInit(element, bootstrap) {
 function bootstrap(element, modules) {
   element = jqLite(element);
   modules = modules || [];
+  modules.unshift(['$provide', function($provide) {
+    $provide.value('$rootElement', element);
+  }]);
   modules.unshift('ng');
   var injector = createInjector(modules);
   injector.invoke(
-    ['$rootScope', '$compile', '$injector', function(scope, compile, injector){
+    ['$rootScope', '$rootElement', '$compile', '$injector', function(scope, element, compile, injector){
       scope.$apply(function() {
         element.data('$injector', injector);
         compile(element)(scope);
