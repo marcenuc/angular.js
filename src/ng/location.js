@@ -85,7 +85,7 @@ function convertToHashbangUrl(url, basePath, hashPrefix) {
         path = match.path.substr(pathPrefix.length);
 
     if (match.path.indexOf(pathPrefix) !== 0) {
-      throw 'Invalid url "' + url + '", missing path prefix "' + pathPrefix + '" !';
+      throw Error('Invalid url "' + url + '", missing path prefix "' + pathPrefix + '" !');
     }
 
     return composeProtocolHostPort(match.protocol, match.host, match.port) + basePath +
@@ -114,7 +114,7 @@ function LocationUrl(url, pathPrefix) {
     var match = matchUrl(url, this);
 
     if (match.path.indexOf(pathPrefix) !== 0) {
-      throw 'Invalid url "' + url + '", missing path prefix "' + pathPrefix + '" !';
+      throw Error('Invalid url "' + url + '", missing path prefix "' + pathPrefix + '" !');
     }
 
     this.$$path = decodeURIComponent(match.path.substr(pathPrefix.length));
@@ -160,8 +160,9 @@ function LocationHashbangUrl(url, hashPrefix) {
   this.$$parse = function(url) {
     var match = matchUrl(url, this);
 
+
     if (match.hash && match.hash.indexOf(hashPrefix) !== 0) {
-      throw 'Invalid url "' + url + '", missing hash prefix "' + hashPrefix + '" !';
+      throw Error('Invalid url "' + url + '", missing hash prefix "' + hashPrefix + '" !');
     }
 
     basePath = match.path + (match.search ? '?' + match.search : '');
@@ -205,8 +206,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#absUrl
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#absUrl
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter only.
@@ -220,8 +221,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#url
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#url
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter / setter.
@@ -247,8 +248,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#protocol
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#protocol
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter only.
@@ -261,8 +262,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#host
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#host
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter only.
@@ -275,8 +276,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#port
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#port
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter only.
@@ -289,8 +290,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#path
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#path
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter / setter.
@@ -311,8 +312,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#search
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#search
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter / setter.
@@ -347,8 +348,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#hash
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#hash
+   * @methodOf ng.$location
    *
    * @description
    * This method is getter / setter.
@@ -364,8 +365,8 @@ LocationUrl.prototype = {
 
   /**
    * @ngdoc method
-   * @name angular.module.ng.$location#replace
-   * @methodOf angular.module.ng.$location
+   * @name ng.$location#replace
+   * @methodOf ng.$location
    *
    * @description
    * If called, all changes to $location during current `$digest` will be replacing current history
@@ -401,7 +402,7 @@ function locationGetterSetter(property, preprocess) {
 
 /**
  * @ngdoc object
- * @name angular.module.ng.$location
+ * @name ng.$location
  *
  * @requires $browser
  * @requires $sniffer
@@ -430,7 +431,7 @@ function locationGetterSetter(property, preprocess) {
 
 /**
  * @ngdoc object
- * @name angular.module.ng.$locationProvider
+ * @name ng.$locationProvider
  * @description
  * Use the `$locationProvider` to configure how the application deep linking paths are stored.
  */
@@ -440,8 +441,8 @@ function $LocationProvider(){
 
   /**
    * @ngdoc property
-   * @name angular.module.ng.$locationProvider#hashPrefix
-   * @methodOf angular.module.ng.$locationProvider
+   * @name ng.$locationProvider#hashPrefix
+   * @methodOf ng.$locationProvider
    * @description
    * @param {string=} prefix Prefix for hash part (containing path and search)
    * @returns {*} current value if used as getter or itself (chaining) if used as setter
@@ -457,8 +458,8 @@ function $LocationProvider(){
 
   /**
    * @ngdoc property
-   * @name angular.module.ng.$locationProvider#html5Mode
-   * @methodOf angular.module.ng.$locationProvider
+   * @name ng.$locationProvider#html5Mode
+   * @methodOf ng.$locationProvider
    * @description
    * @param {string=} mode Use HTML5 strategy if available.
    * @returns {*} current value if used as getter or itself (chaining) if used as setter
@@ -475,12 +476,14 @@ function $LocationProvider(){
   this.$get = ['$rootScope', '$browser', '$sniffer', '$rootElement',
       function( $rootScope,   $browser,   $sniffer,   $rootElement) {
     var $location,
-        basePath = $browser.baseHref() || '/',
-        pathPrefix = pathPrefixFromBase(basePath),
+        basePath,
+        pathPrefix,
         initUrl = $browser.url(),
         absUrlPrefix;
 
     if (html5Mode) {
+      basePath = $browser.baseHref() || '/';
+      pathPrefix = pathPrefixFromBase(basePath);
       if ($sniffer.history) {
         $location = new LocationUrl(
           convertToHtml5Url(initUrl, basePath, hashPrefix),
@@ -490,13 +493,13 @@ function $LocationProvider(){
           convertToHashbangUrl(initUrl, basePath, hashPrefix),
           hashPrefix);
       }
+      // link rewriting
+      absUrlPrefix = composeProtocolHostPort(
+        $location.protocol(), $location.host(), $location.port()) + pathPrefix;
     } else {
       $location = new LocationHashbangUrl(initUrl, hashPrefix);
+      absUrlPrefix = $location.absUrl().split('#')[0];
     }
-
-    // link rewriting
-    absUrlPrefix = composeProtocolHostPort(
-        $location.protocol(), $location.host(), $location.port()) + pathPrefix;
 
     $rootElement.bind('click', function(event) {
       // TODO(vojta): rewrite link when opening in new tab/window (in legacy browser)
@@ -511,7 +514,8 @@ function $LocationProvider(){
         elm = elm.parent();
       }
 
-      var absHref = elm.prop('href');
+      var absHref = elm.prop('href'),
+          href;
 
       if (!absHref ||
         elm.attr('target') ||
@@ -520,7 +524,9 @@ function $LocationProvider(){
       }
 
       // update location with href without the prefix
-      $location.url(absHref.substr(absUrlPrefix.length));
+      href = absHref.substr(absUrlPrefix.length);
+      if (href.charAt(0) == '#') href = href.substr(1);
+      $location.url(href);
       $rootScope.$apply();
       event.preventDefault();
       // hack to work around FF6 bug 684208 when scenario runner clicks on links
